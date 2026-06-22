@@ -83,7 +83,26 @@ importers:
 
   web: {}
 
-  workflows: {}
+  workflows:
+    dependencies:
+      '@riverline/compliance-agent':
+        specifier: workspace:*
+        version: link:../agents/compliance-agent
+      '@riverline/intent-agent':
+        specifier: workspace:*
+        version: link:../agents/intent-agent
+      '@riverline/negotiation-agent':
+        specifier: workspace:*
+        version: link:../agents/negotiation-agent
+      '@riverline/risk-agent':
+        specifier: workspace:*
+        version: link:../agents/risk-agent
+      '@riverline/shared':
+        specifier: workspace:*
+        version: link:../shared
+      dotenv:
+        specifier: ^17.0.0
+        version: 17.4.2
 
 packages:
 

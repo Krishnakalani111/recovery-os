@@ -3,5 +3,16 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "scripts": { "lint": "echo no-op" }
+  "scripts": {
+    "demo": "tsx src/demo.ts",
+    "lint": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@riverline/shared": "workspace:*",
+    "@riverline/intent-agent": "workspace:*",
+    "@riverline/risk-agent": "workspace:*",
+    "@riverline/negotiation-agent": "workspace:*",
+    "@riverline/compliance-agent": "workspace:*",
+    "dotenv": "^17.0.0"
+  }
 }
