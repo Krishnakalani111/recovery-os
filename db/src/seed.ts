@@ -1,5 +1,5 @@
 import { db } from "./client";
-import { borrowers } from "./schema";
+import { borrowers, snapshots } from "./schema";
 
 // A few borrowers spanning the risk spectrum.
 const seed = [
@@ -10,8 +10,14 @@ const seed = [
 ];
 
 async function main() {
-  await db.insert(borrowers).values(seed);
-  console.log(`seeded ${seed.length} borrowers`);
+  const inserted = await db.insert(borrowers).values(seed).returning();
+
+  // Baseline snapshot per borrower so every trend has a starting point.
+  await db.insert(snapshots).values(
+    inserted.map((b) => ({ borrowerId: b.id, riskScore: b.riskScore })),
+  );
+
+  console.log(`seeded ${inserted.length} borrowers + baseline snapshots`);
   process.exit(0);
 }
 

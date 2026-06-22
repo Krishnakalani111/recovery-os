@@ -52,6 +52,33 @@ export const agentRuns = pgTable("agent_runs", {
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
+// Point-in-time rollup of a borrower's state after a workflow run.
+// Append-only history; borrowers.riskScore mirrors the latest row's riskScore.
+export const snapshots = pgTable("snapshots", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  borrowerId: uuid("borrower_id")
+    .notNull()
+    .references(() => borrowers.id, { onDelete: "cascade" }),
+  conversationId: uuid("conversation_id").references(() => conversations.id, {
+    onDelete: "set null",
+  }),
+  messageId: uuid("message_id").references(() => messages.id, {
+    onDelete: "set null",
+  }),
+  // risk
+  riskScore: integer("risk_score").notNull(),
+  riskBand: text("risk_band"),
+  recoveryProbability: numeric("recovery_probability"),
+  // intent
+  intent: text("intent"),
+  intentConfidence: numeric("intent_confidence"),
+  // decision
+  recommendedOption: text("recommended_option"),
+  planConfidence: numeric("plan_confidence"),
+  escalate: text("escalate").notNull().default("no"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
 // The recommendation produced at the end of a workflow run.
 export const recoveryPlans = pgTable("recovery_plans", {
   id: uuid("id").defaultRandom().primaryKey(),
