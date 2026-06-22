@@ -5,6 +5,8 @@
   "type": "module",
   "scripts": {
     "demo": "tsx src/demo.ts",
+    "worker": "tsx watch src/worker.ts",
+    "trigger": "tsx src/trigger.ts",
     "lint": "tsc --noEmit"
   },
   "dependencies": {
@@ -13,6 +15,12 @@
     "@riverline/risk-agent": "workspace:*",
     "@riverline/negotiation-agent": "workspace:*",
     "@riverline/compliance-agent": "workspace:*",
+    "@riverline/db": "workspace:*",
+    "drizzle-orm": "^0.45.2",
+    "@temporalio/activity": "^1.18.1",
+    "@temporalio/client": "^1.18.1",
+    "@temporalio/worker": "^1.18.1",
+    "@temporalio/workflow": "^1.18.1",
     "dotenv": "^17.0.0"
   }
 }
