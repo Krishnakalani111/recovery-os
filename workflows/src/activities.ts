@@ -1,12 +1,13 @@
 import { Context, ApplicationFailure } from "@temporalio/activity";
 import { eq } from "drizzle-orm";
 import { db, schema } from "@riverline/db";
-import type {
-  BorrowerContext,
-  IntentOutput,
-  RiskOutput,
-  NegotiationOutput,
-  ComplianceOutput,
+import {
+  buildRecommendation,
+  type BorrowerContext,
+  type IntentOutput,
+  type RiskOutput,
+  type NegotiationOutput,
+  type ComplianceOutput,
 } from "@riverline/shared";
 import { runIntentAgent } from "@riverline/intent-agent";
 import { runRiskAgent } from "@riverline/risk-agent";
@@ -101,29 +102,42 @@ export async function persistTurn(input: PersistTurnInput): Promise<void> {
     { messageId, agent: "compliance", output: input.compliance },
   ]);
 
-  const [b] = await db
-    .select({ score: schema.borrowers.riskScore })
-    .from(schema.borrowers)
-    .where(eq(schema.borrowers.id, borrowerId));
-  const before = b?.score ?? 50;
-  const delta = input.risk.riskBand === "high" ? 8 : input.risk.riskBand === "low" ? -5 : 0;
-  const after = Math.max(0, Math.min(100, before + delta));
+  const borrower = await loadBorrower(borrowerId);
+  const rec = buildRecommendation({
+    borrower,
+    intent: input.intent,
+    risk: input.risk,
+    negotiation: input.negotiation,
+    compliance: input.compliance,
+  });
+
+  const followUp = new Date();
+  followUp.setDate(followUp.getDate() + rec.followUpInDays);
+
+  await db.insert(schema.recoveryPlans).values({
+    messageId,
+    plan: rec.plan,
+    confidence: String(rec.confidence),
+    followUpDate: followUp,
+    escalate: rec.escalate,
+  });
 
   await db.insert(schema.snapshots).values({
     borrowerId,
     conversationId,
     messageId,
-    riskScore: after,
+    riskScore: rec.newRiskScore,
     riskBand: input.risk.riskBand,
     recoveryProbability: String(input.risk.recoveryProbability),
     intent: input.intent.intent,
     intentConfidence: String(input.intent.confidence),
     recommendedOption: input.negotiation.recommended,
-    escalate: "no",
+    planConfidence: String(rec.confidence),
+    escalate: rec.escalate,
   });
 
   await db
     .update(schema.borrowers)
-    .set({ riskScore: after })
+    .set({ riskScore: rec.newRiskScore })
     .where(eq(schema.borrowers.id, borrowerId));
 }
