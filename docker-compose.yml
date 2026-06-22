@@ -1,0 +1,22 @@
+services:
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: recovery
+      POSTGRES_PASSWORD: recovery
+      POSTGRES_DB: recovery
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  # Temporal dev server (in-memory, no extra DB needed). UI on :8233.
+  temporal:
+    image: temporalio/admin-tools:latest
+    command: temporal server start-dev --ip 0.0.0.0
+    ports:
+      - "7233:7233"
+      - "8233:8233"
+
+volumes:
+  pgdata:
