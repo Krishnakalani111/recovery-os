@@ -1,0 +1,7 @@
+packages:
+  - "web"
+  - "api"
+  - "workflows"
+  - "db"
+  - "shared"
+  - "agents/*"

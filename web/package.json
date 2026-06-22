@@ -1,0 +1,6 @@
+{
+  "name": "@riverline/web",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": { "lint": "echo no-op" }
+}
